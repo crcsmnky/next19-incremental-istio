@@ -1,0 +1,55 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: weather-backend-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: http
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: weather-backend-service
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - weather-backend-gateway
+  http:
+  - match:
+    - uri:
+        exact: /api/weather
+    route:
+    - destination:
+        host: weather-backend
+        subset: single
+        port:
+          number: 5000
+      weight: 90
+    - destination:
+        host: weather-backend
+        subset: multiple
+        port:
+          number: 5000
+      weight: 10
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: weather-backend-destination
+spec:
+  host: weather-backend
+  subsets:
+  - name: single
+    labels:
+      version: single
+  - name: multiple
+    labels:
+      version: multiple

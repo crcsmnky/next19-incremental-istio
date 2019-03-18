@@ -1,0 +1,11 @@
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: mtls-backend
+  namespace: secure
+spec:
+  targets:
+  - name: weather-backend
+  peers:
+  - mtls:
+      mode: STRICT
