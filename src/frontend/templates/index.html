@@ -18,6 +18,12 @@
             </div>
         </div>
 
+        {% if msg is not none %}
+            <div>
+                <pre>{{ msg }}</pre>
+            </div>
+        {% endif %}
+
         {% if cities|length > 1 %}
             <div class="card-group">
         {% else %}
