@@ -9,4 +9,4 @@ if [[ -z "${FRONTEND_HOST}" ]]; then
 fi
 
 set -x
-locust --host="http://${FRONTEND_HOST}" --no-web -c 10
+locust --host="http://${FRONTEND_HOST}" --no-web -c 5
