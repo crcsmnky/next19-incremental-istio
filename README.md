@@ -37,10 +37,10 @@ Confirm that worked by forwarding the `weather-frontend` port and opening a brow
 - `kubectl port-forward -n traffic deployment/weather-frontend 5000`
 
 Next, apply traffic rules to do a 90/10 split between `weather-backend-single` and `weather-backend-multiple`:
-- `kubectl apply -n traffic -f istio/traffic/ingressgateway-backend.yaml`
+- `kubectl apply -n traffic -f traffic/weather-backend-rules.yaml`
 
 Now, you'll need to update the `weather-frontend` deployment to use `istio-ingressgateway` as the backend, instead of `weather-backend`:
-- `kubectl apply -n traffic -f istio/traffic/deployment-ingressgateway.yaml`
+- `kubectl apply -n traffic -f traffic/weather-deployment-ingressgateway.yaml`
 
 Finally, restart that port-forwarding from before so you can see `weather-frontend` now using the 90/10 split we specified via [http://localhost:5000](http://localhost:5000):
 - `kubectl port-forward -n traffic deployment/weather-frontend 5000`
@@ -53,17 +53,17 @@ Now let's incrementally deploy mutual TLS authentication between our Pods. First
 - `kubectl label ns secure istio-injection=enabled`
 
 Next, deploy the `Gateway`, `VirtualService`, `DestinationRule`, and `ServiceEntry` objects that will setup our `weatherinfo` app, and then deploy the app itself:
-- `kubectl -n secure apply -f istio/security/services-rules.yaml`
-- `kubectl -n secure apply -f kubernetes/deployment.yaml`
+- `kubectl -n secure apply -f security/weather-rules.yaml`
+- `kubectl -n secure apply -f manifests/weather-deployment.yaml`
 
 Now let's start the incremental mTLS rollout. The first step is to set `weather-backend` into `PERMISSIVE` mode. This mode allows clients that **can** do mTLS to use it, and allows clients that **cannot** use mTLS to continue without it:
-- `kubectl -n secure apply -f istio/security/mtls-backend-permissive.yaml`
+- `kubectl -n secure apply -f security/mtls-backend-permissive.yaml`
 
 Next activate mTLS between `weather-frontend` and `weather-backend`:
-- `kubectl -n secure apply -f istio/security/mtls-mutual.yaml`
+- `kubectl -n secure apply -f security/mtls-backend-mutual.yaml`
 
 So now, inside of your deployment, all services are using mTLS to authenticate. But what about legacy clients? Deploy a simple Pod to the `legacy` namespace and we can test out what happens:
-- `kubectl apply -n legacy -f istio/security/sleep.yaml`
+- `kubectl apply -n legacy -f security/sleep.yaml`
 - `SLEEP=$(kubectl get pod -n legacy -l app=sleep -o jsonpath="{.items..metadata.name}")`
 
 Then `exec` into that Pod and run some `curl` commands to confirm non-mTLS clients still work:
@@ -71,7 +71,7 @@ Then `exec` into that Pod and run some `curl` commands to confirm non-mTLS clien
 - `curl http://weather-backend.secure:5000/api/weather`
 
 Finally, update the `Policy` to `STRICT` mode, meaning only mTLS-enabled services can talk to `weather-backend`:
-- `kubectl apply -f istio/security/mtls-backend-strict.yaml`
+- `kubectl apply -f security/mtls-backend-strict.yaml`
 
 Go back and try the `exec` and `curl` commands again, and you'll see that you can't connect to the `weather-backend` any longer from a Pod without `istio-proxy`.
 
