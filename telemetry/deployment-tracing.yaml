@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: weather-frontend
-        image: gcr.io/clown-shoes-3000/weather-frontend:1.0
+        image: gcr.io/next19-inc-istio/weather-frontend:1.0
         imagePullPolicy: Always
         env:
         - name: BACKEND_HOSTPORT
@@ -75,7 +75,7 @@ spec:
     spec:
       containers:
       - name: weather-backend
-        image: gcr.io/clown-shoes-3000/weather-backend-single:1.0
+        image: gcr.io/next19-inc-istio/weather-backend-single:1.0
         imagePullPolicy: Always
         env:
         - name: OWM_API_KEY
@@ -110,7 +110,7 @@ spec:
     spec:
       containers:
       - name: weather-backend
-        image: gcr.io/clown-shoes-3000/weather-backend-multiple:1.0
+        image: gcr.io/next19-inc-istio/weather-backend-multiple:1.0
         imagePullPolicy: Always
         env:
         - name: OWM_API_KEY
